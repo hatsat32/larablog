@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Admin\Dashboard;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\Dashboard;
 use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\KullaniciController;
 use App\Http\Controllers\Admin\YaziController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,11 +24,22 @@ use App\Http\Controllers\Admin\YaziController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/yazi/{slug}', [HomeController::class, 'yazi'])->name('pub_yazi');
 
-Route::prefix('admin')->group(function () {
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/', [Dashboard::class, 'index']);
 
-    Route::get('kullanicilar', function () {
-        return "kullanicilar";
+    Route::prefix('kullanicilar')->group(function () {
+        Route::get('/', [KullaniciController::class, 'index'])->name('kullanici');
+        Route::get('/ekle', [KullaniciController::class, 'ekle'])->name('kullanici_ekle');
+        Route::post('/', [KullaniciController::class, 'kaydet'])->name('kullanici_kaydet');
+        Route::get('/{id}', [KullaniciController::class, 'detay'])->name('kullanici_detay');
+        Route::post('/{id}', [KullaniciController::class, 'guncelle'])->name('kullanici_guncelle');
+        Route::post('/{id}/sil', [KullaniciController::class, 'sil'])->name('kullanici_sil');
+        Route::post('/{id}/parola', [KullaniciController::class, 'parola']);
     });
 
     Route::prefix('kategoriler')->group(function () {
